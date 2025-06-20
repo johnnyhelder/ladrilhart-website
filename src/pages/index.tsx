@@ -3,7 +3,7 @@ import Head from 'next/head'
 import Layout from '../components/Layout'
 import BeforeAfterSlider from '../components/BeforeAfterSlider'
 import ContactForm from '../components/ContactForm'
-import { Phone, Mail, MapPin, Star, Calendar, CheckCircle, ArrowRight, Camera } from 'lucide-react'
+import { Phone, Mail, MapPin, Star, CheckCircle, ArrowRight } from 'lucide-react'
 
 export default function Home() {
   const [currentTestimonial, setCurrentTestimonial] = useState(0)
@@ -52,7 +52,7 @@ export default function Home() {
       setCurrentTestimonial((prev) => (prev + 1) % testimonials.length)
     }, 5000)
     return () => clearInterval(interval)
-  }, [])
+  }, [testimonials.length])
 
   return (
     <Layout>
@@ -73,7 +73,7 @@ export default function Home() {
               Projetos completos desde o design até à execução final, com acompanhamento personalizado.
             </p>
             <p className="text-lg text-gray-500 dark:text-gray-400 max-w-2xl mx-auto mb-8">
-              "Transformar espaços é transformar vidas" - Bruno Miranda
+              &quot;Transformar espaços é transformar vidas&quot; - Bruno Miranda
             </p>
             <button className="bg-blue-900 dark:bg-blue-800 text-white px-8 py-4 rounded-lg font-semibold hover:bg-blue-800 dark:hover:bg-blue-700 transition-colors flex items-center mx-auto">
               Solicitar Orçamento Gratuito
@@ -128,8 +128,8 @@ export default function Home() {
                 que os mais altos padrões sejam mantidos.
               </p>
               <p className="text-gray-600 dark:text-gray-300 mb-8 italic">
-                "Transformar espaços é transformar vidas. Cada casa de banho que remodelamos 
-                não é apenas uma obra, é o sonho de uma família tornando-se realidade." 
+                &quot;Transformar espaços é transformar vidas. Cada casa de banho que remodelamos 
+                não é apenas uma obra, é o sonho de uma família tornando-se realidade.&quot; 
                 - Bruno Miranda
               </p>
               <div className="flex items-center space-x-6">
@@ -204,7 +204,7 @@ export default function Home() {
                 ))}
               </div>
               <p className="text-xl mb-6 italic">
-                "{testimonials[currentTestimonial].text}"
+                &quot;{testimonials[currentTestimonial].text}&quot;
               </p>
               <div className="text-lg font-semibold">
                 {testimonials[currentTestimonial].name}
