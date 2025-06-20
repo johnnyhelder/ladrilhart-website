@@ -1,4 +1,4 @@
-import { Phone, Mail, MapPin, Instagram, Camera, Linkedin } from 'lucide-react'
+import { Instagram, Camera, Linkedin } from 'lucide-react'
 import Logo from './Logo'
 
 export default function Footer() {
