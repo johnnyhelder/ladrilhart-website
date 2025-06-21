@@ -10,8 +10,10 @@ const supabaseAdmin = createClient(
 // GET - Buscar post por ID
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params
+
   try {
     const cookieStore = await cookies()
     const userEmail = cookieStore.get('user-email')?.value
@@ -23,7 +25,7 @@ export async function GET(
     const { data: post, error } = await supabaseAdmin
       .from('posts')
       .select('*')
-      .eq('id', params.id)
+      .eq('id', id)
       .single()
 
     if (error || !post) {
@@ -44,8 +46,10 @@ export async function GET(
 // PUT - Atualizar post
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params
+
   try {
     const cookieStore = await cookies()
     const userEmail = cookieStore.get('user-email')?.value
@@ -59,7 +63,7 @@ export async function PUT(
     const { data: existingPost } = await supabaseAdmin
       .from('posts')
       .select('author_id, published_at')
-      .eq('id', params.id)
+      .eq('id', id)
       .single()
 
     if (!existingPost) {
@@ -99,7 +103,7 @@ export async function PUT(
     const { data: post, error } = await supabaseAdmin
       .from('posts')
       .update(updateData)
-      .eq('id', params.id)
+      .eq('id', id)
       .select()
       .single()
 
@@ -127,8 +131,10 @@ export async function PUT(
 // DELETE - Deletar post
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id:string }> }
 ) {
+  const { id } = await params
+  
   try {
     const cookieStore = await cookies()
     const userEmail = cookieStore.get('user-email')?.value
@@ -146,7 +152,7 @@ export async function DELETE(
     const { error } = await supabaseAdmin
       .from('posts')
       .delete()
-      .eq('id', params.id)
+      .eq('id', id)
 
     if (error) throw error
 
