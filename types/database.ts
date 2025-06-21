@@ -123,3 +123,46 @@ export interface Database {
     }
   }
 }
+
+// Blog Types
+export interface Profile {
+  id: string
+  email: string
+  full_name: string | null
+  role: 'admin' | 'author'
+  created_at: string
+  updated_at: string
+}
+
+export interface Post {
+  id: string
+  title: string
+  slug: string
+  content: string
+  excerpt: string | null
+  featured_image: string | null
+  author_id: string
+  status: 'draft' | 'pending' | 'published' | 'rejected'
+  published_at: string | null
+  created_at: string
+  updated_at: string
+  author?: Profile
+  categories?: Category[]
+}
+
+export interface Category {
+  id: string
+  name: string
+  slug: string
+  description: string | null
+  created_at: string
+}
+
+export interface OTPCode {
+  id: string
+  email: string
+  code: string
+  expires_at: string
+  used: boolean
+  created_at: string
+}
