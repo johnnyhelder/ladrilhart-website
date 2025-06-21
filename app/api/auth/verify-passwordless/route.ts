@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
     console.log('Perfil encontrado:', profile.email, profile.role)
 
     // Criar cookies de sessão simples
-    const cookieStore = cookies()
+    const cookieStore = await cookies()
     
     cookieStore.set('user-email', email, {
       httpOnly: true,

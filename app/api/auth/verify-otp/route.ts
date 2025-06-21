@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Definir cookies de sessão
-    const cookieStore = cookies()
+    const cookieStore = await cookies()
     cookieStore.set('supabase-auth-token', tempToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
