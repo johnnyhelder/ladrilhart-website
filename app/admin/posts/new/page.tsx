@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ArrowLeft, Loader2 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
+import { Category } from '@/types/database'
 
 export default function NewPostPage() {
   const router = useRouter()
@@ -24,6 +25,24 @@ export default function NewPostPage() {
     excerpt: '',
     status: 'draft'
   })
+  const [categories, setCategories] = useState<Category[]>([])
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([])
+
+  useEffect(() => {
+    loadCategories()
+  }, [])
+
+  const loadCategories = async () => {
+    try {
+      const response = await fetch('/api/categories')
+      if (response.ok) {
+        const data = await response.json()
+        setCategories(data)
+      }
+    } catch (error) {
+      console.error('Error loading categories:', error)
+    }
+  }
 
   const generateSlug = (title: string) => {
     return title
@@ -51,7 +70,10 @@ export default function NewPostPage() {
       const response = await fetch('/api/posts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify({
+          ...formData,
+          categories: selectedCategories
+        })
       })
 
       if (!response.ok) {
@@ -128,6 +150,41 @@ export default function NewPostPage() {
                   placeholder="Breve descrição do post (opcional)"
                   rows={3}
                 />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Categorias</Label>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 pt-1">
+                  {categories.map((category) => (
+                    <label
+                      key={category.id}
+                      className="flex items-center space-x-2 p-2 rounded-md border bg-background hover:bg-accent cursor-pointer"
+                    >
+                      <input
+                        type="checkbox"
+                        value={category.id}
+                        checked={selectedCategories.includes(category.id)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedCategories([...selectedCategories, category.id])
+                          } else {
+                            setSelectedCategories(selectedCategories.filter(id => id !== category.id))
+                          }
+                        }}
+                        className="w-4 h-4"
+                      />
+                      <span className="text-sm">{category.name}</span>
+                    </label>
+                  ))}
+                </div>
+                {categories.length === 0 && (
+                  <p className="text-sm text-muted-foreground pt-2">
+                    Nenhuma categoria disponível. 
+                    <Link href="/admin/categories/new" className="text-primary hover:underline ml-1">
+                      Criar categoria
+                    </Link>
+                  </p>
+                )}
               </div>
             </CardContent>
           </Card>

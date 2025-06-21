@@ -32,7 +32,17 @@ export async function GET(request: NextRequest) {
     // Buscar posts baseado no role
     let query = supabaseAdmin
       .from('posts')
-      .select('*')
+      .select(`
+        *,
+        post_categories (
+          category_id,
+          categories (
+            id,
+            name,
+            slug
+          )
+        )
+      `)
       .order('created_at', { ascending: false })
 
     // Se não for admin, mostrar apenas os próprios posts
@@ -107,6 +117,18 @@ export async function POST(request: NextRequest) {
         )
       }
       throw error
+    }
+
+    // Salvar categorias se fornecidas
+    if (body.categories && body.categories.length > 0) {
+      const postCategories = body.categories.map((categoryId: string) => ({
+        post_id: post.id,
+        category_id: categoryId
+      }))
+
+      await supabaseAdmin
+        .from('post_categories')
+        .insert(postCategories)
     }
 
     return NextResponse.json(post)

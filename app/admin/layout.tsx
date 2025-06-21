@@ -248,21 +248,21 @@ export default function AdminLayout({
           </div>
         </div>
 
-        {/* Page content */}
-        <main className="p-4 md:p-6 lg:p-8">
+        {/* Menu horizontal temporário para debug */}
+        <div className="p-4 bg-yellow-100 text-yellow-800 flex gap-4">
+          <Link href="/admin" className="px-4 py-2 text-sm font-medium bg-gray-200 text-gray-700 rounded hover:bg-gray-300">
+            Dashboard
+          </Link>
+          <Link href="/admin/posts" className="px-4 py-2 text-sm font-medium bg-gray-200 text-gray-700 rounded hover:bg-gray-300">
+            Posts
+          </Link>
+          <Link href="/admin/categories" className="px-4 py-2 text-sm font-medium bg-gray-200 text-gray-700 rounded hover:bg-gray-300">
+            Categorias
+          </Link>
+        </div>
+
+        <main className="p-4 sm:p-6 lg:p-8">
           {children}
-          {/* Menu horizontal temporário */}
-          <nav className="mb-6 flex flex-wrap gap-4 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
-            <Link href="/admin" className="px-4 py-2 text-sm font-medium bg-primary text-white rounded hover:bg-primary/90">
-              Dashboard
-            </Link>
-            <Link href="/admin/posts" className="px-4 py-2 text-sm font-medium bg-gray-200 text-gray-700 rounded hover:bg-gray-300">
-              Posts
-            </Link>
-            <Link href="/admin/posts/new" className="px-4 py-2 text-sm font-medium bg-green-500 text-white rounded hover:bg-green-600">
-              + Novo Post
-            </Link>
-          </nav>
         </main>
       </div>
     </div>

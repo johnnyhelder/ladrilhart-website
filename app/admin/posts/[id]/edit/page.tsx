@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ArrowLeft, Loader2 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
+import { Category } from '@/types/database'
 
 export default function EditPostPage({ 
   params 
@@ -30,6 +31,8 @@ export default function EditPostPage({
     excerpt: '',
     status: 'draft'
   })
+  const [categories, setCategories] = useState<Category[]>([])
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([])
 
   useEffect(() => {
     loadPost()
@@ -48,6 +51,17 @@ export default function EditPostPage({
         excerpt: post.excerpt || '',
         status: post.status
       })
+
+      if (post.post_categories) {
+        const categoryIds = post.post_categories.map((pc: any) => pc.category_id)
+        setSelectedCategories(categoryIds)
+      }
+
+      const categoriesResponse = await fetch('/api/categories')
+      if (categoriesResponse.ok) {
+        const categoriesData = await categoriesResponse.json()
+        setCategories(categoriesData)
+      }
     } catch (error) {
       toast({
         title: 'Erro',
@@ -87,7 +101,10 @@ export default function EditPostPage({
       const response = await fetch(`/api/posts/${resolvedParams.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify({
+          ...formData,
+          categories: selectedCategories
+        })
       })
 
       if (!response.ok) {
@@ -173,6 +190,41 @@ export default function EditPostPage({
                   placeholder="Breve descrição do post (opcional)"
                   rows={3}
                 />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Categorias</Label>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 pt-1">
+                  {categories.map((category) => (
+                    <label
+                      key={category.id}
+                      className="flex items-center space-x-2 p-2 rounded-md border bg-background hover:bg-accent cursor-pointer"
+                    >
+                      <input
+                        type="checkbox"
+                        value={category.id}
+                        checked={selectedCategories.includes(category.id)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedCategories([...selectedCategories, category.id])
+                          } else {
+                            setSelectedCategories(selectedCategories.filter(id => id !== category.id))
+                          }
+                        }}
+                        className="w-4 h-4"
+                      />
+                      <span className="text-sm">{category.name}</span>
+                    </label>
+                  ))}
+                </div>
+                {categories.length === 0 && (
+                  <p className="text-sm text-muted-foreground pt-2">
+                    Nenhuma categoria disponível. 
+                    <Link href="/admin/categories/new" className="text-primary hover:underline ml-1">
+                      Criar categoria
+                    </Link>
+                  </p>
+                )}
               </div>
             </CardContent>
           </Card>

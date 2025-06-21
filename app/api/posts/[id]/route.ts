@@ -24,7 +24,17 @@ export async function GET(
 
     const { data: post, error } = await supabaseAdmin
       .from('posts')
-      .select('*')
+      .select(`
+        *,
+        post_categories (
+          category_id,
+          categories (
+            id,
+            name,
+            slug
+          )
+        )
+      `)
       .eq('id', id)
       .single()
 
@@ -115,6 +125,27 @@ export async function PUT(
         )
       }
       throw error
+    }
+
+    // Atualizar categorias
+    if (body.categories !== undefined) {
+      // Remover categorias antigas
+      await supabaseAdmin
+        .from('post_categories')
+        .delete()
+        .eq('post_id', id)
+
+      // Adicionar novas categorias
+      if (body.categories.length > 0) {
+        const postCategories = body.categories.map((categoryId: string) => ({
+          post_id: id,
+          category_id: categoryId
+        }))
+    
+        await supabaseAdmin
+          .from('post_categories')
+          .insert(postCategories)
+      }
     }
 
     return NextResponse.json(post)

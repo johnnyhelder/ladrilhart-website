@@ -1,43 +1,69 @@
+import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@supabase/supabase-js'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { CalendarDays, Clock, ArrowRight } from 'lucide-react'
+import { CalendarDays, Clock, ArrowRight, ArrowLeft } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 )
 
-export default async function BlogPage() {
-  // Buscar apenas posts publicados
+export default async function CategoryPage({
+  params
+}: {
+  params: Promise<{ slug: string }>
+}) {
+  const { slug } = await params
+
+  // Buscar categoria
+  const { data: category } = await supabase
+    .from('categories')
+    .select('*')
+    .eq('slug', slug)
+    .single()
+
+  if (!category) {
+    notFound()
+  }
+
+  // Buscar posts da categoria
   const { data: posts } = await supabase
     .from('posts')
     .select(`
       *,
       profiles(full_name),
-      post_categories (
-        categories (
-          id,
-          name,
-          slug
-        )
+      post_categories!inner (
+        category_id
       )
     `)
     .eq('status', 'published')
+    .eq('post_categories.category_id', category.id)
     .order('published_at', { ascending: false })
-
-  console.log('Posts com categorias:', JSON.stringify(posts, null, 2))
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="max-w-4xl mx-auto px-4 py-12">
-        <h1 className="text-4xl font-bold mb-8">Blog</h1>
+        <Link href="/blog">
+          <Button variant="ghost" className="mb-6">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Voltar ao Blog
+          </Button>
+        </Link>
+
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold mb-2">Categoria: {category.name}</h1>
+          {category.description && (
+            <p className="text-lg text-muted-foreground">{category.description}</p>
+          )}
+        </div>
         
         {!posts || posts.length === 0 ? (
           <Card>
             <CardContent className="text-center py-10">
               <p className="text-muted-foreground">
-                Ainda não há posts publicados.
+                Ainda não há posts nesta categoria.
               </p>
             </CardContent>
           </Card>
@@ -54,20 +80,7 @@ export default async function BlogPage() {
                       {post.title}
                     </Link>
                   </CardTitle>
-                  {post.post_categories && post.post_categories.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      {post.post_categories.map((pc: any) => (
-                        <Link
-                          key={pc.categories.id}
-                          href={`/blog/categoria/${pc.categories.slug}`}
-                          className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
-                        >
-                          {pc.categories.name}
-                        </Link>
-                      ))}
-                    </div>
-                  )}
-                  <div className="flex items-center gap-4 text-sm text-muted-foreground pt-2">
+                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
                     <span className="flex items-center gap-1">
                       <CalendarDays className="h-4 w-4" />
                       {new Date(post.published_at).toLocaleDateString('pt-BR')}

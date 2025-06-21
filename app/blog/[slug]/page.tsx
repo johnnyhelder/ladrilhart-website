@@ -18,7 +18,17 @@ export default async function BlogPostPage({
 
   const { data: post } = await supabase
     .from('posts')
-    .select('*, profiles(full_name)')
+    .select(`
+      *,
+      profiles(full_name),
+      post_categories (
+        categories (
+          id,
+          name,
+          slug
+        )
+      )
+    `)
     .eq('slug', slug)
     .eq('status', 'published')
     .single()
@@ -40,23 +50,38 @@ export default async function BlogPostPage({
         <header className="mb-8">
           <h1 className="text-4xl font-bold mb-4">{post.title}</h1>
           
-          <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-            <span className="flex items-center gap-1">
-              <User className="h-4 w-4" />
-              {post.profiles?.full_name || 'Autor'}
-            </span>
-            <span className="flex items-center gap-1">
-              <CalendarDays className="h-4 w-4" />
-              {new Date(post.published_at).toLocaleDateString('pt-BR', {
-                day: 'numeric',
-                month: 'long',
-                year: 'numeric'
-              })}
-            </span>
-            <span className="flex items-center gap-1">
-              <Clock className="h-4 w-4" />
-              {Math.ceil(post.content.split(' ').length / 200)} min de leitura
-            </span>
+          <div className="flex flex-col gap-4 text-sm text-muted-foreground">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+              <span className="flex items-center gap-1">
+                <User className="h-4 w-4" />
+                {post.profiles?.full_name || 'Autor'}
+              </span>
+              <span className="flex items-center gap-1">
+                <CalendarDays className="h-4 w-4" />
+                {new Date(post.published_at).toLocaleDateString('pt-BR', {
+                  day: 'numeric',
+                  month: 'long',
+                  year: 'numeric'
+                })}
+              </span>
+              <span className="flex items-center gap-1">
+                <Clock className="h-4 w-4" />
+                {Math.ceil(post.content.split(' ').length / 200)} min de leitura
+              </span>
+            </div>
+            {post.post_categories && post.post_categories.length > 0 && (
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                {post.post_categories.map((pc: any, index: number) => (
+                  <Link
+                    key={pc.categories.id}
+                    href={`/blog/categoria/${pc.categories.slug}`}
+                    className="text-primary hover:underline"
+                  >
+                    {pc.categories.name}{index < post.post_categories.length - 1 ? ',' : ''}
+                  </Link>
+                ))}
+              </div>
+            )}
           </div>
         </header>
 
